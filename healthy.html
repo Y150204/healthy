@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健康慧诊助手</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #6675D9 0%, #4d53e8 100%);
+            min-height: 100vh;
+            font-family: 'PingFang SC', 'Noto Sans SC', sans-serif;
+        }
+        
+        .app-container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+        
+        .header {
+            background: linear-gradient(to right, #4d53e8, #6675D9);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0 0 10px 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        
+        .header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        #health-assistant-container {
+            min-height: 500px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .app-container {
+                margin: 10px auto;
+            }
+            
+            .header {
+                padding: 20px 15px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1>健康慧诊助手</h1>
+            <p>AI智能健康咨询，7x24小时为您服务</p>
+        </div>
+        
+        <!-- 健康助手将在这里渲染 -->
+        <div id="health-assistant-container"></div>
+        
+        <div class="footer">
+            <p>© 2024 健康慧诊助手 | 健康咨询仅供参考，不能替代专业医疗建议</p>
+            <p style="font-size: 12px; margin-top: 5px;">如有紧急情况，请立即拨打120或前往最近医院</p>
+        </div>
+    </div>
+    
+    <!-- 引入我们的健康助手JS -->
+    <script src="health-assistant.js"></script>
+    
+    <script>
+        // 可选：添加一些额外的初始化代码
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('健康慧诊助手已加载');
+            
+            // 可以在这里添加一些额外的功能
+            // 例如：添加键盘快捷键
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'k') {
+                    e.preventDefault();
+                    document.querySelector('.health-assistant-container input')?.focus();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
