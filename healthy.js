@@ -1,343 +1,471 @@
-// health-assistant.js - 健康慧诊助手前端逻辑
+// health-assistant-coze.js
+// 适配原有Coze平台的健康助手扩展
 
-class HealthAssistant {
-    constructor(options = {}) {
-        this.container = options.container || document.body;
-        this.apiUrl = options.apiUrl || 'https://api.example.com/health-assistant';
-        this.isLoading = false;
-        this.messages = [];
-        
-        this.init();
+(function() {
+    'use strict';
+    
+    // 等待页面完全加载
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initHealthAssistant);
+    } else {
+        initHealthAssistant();
     }
     
-    init() {
-        this.renderUI();
-        this.bindEvents();
-        this.loadInitialMessage();
+    function initHealthAssistant() {
+        // 给一些时间让原页面渲染完成
+        setTimeout(() => {
+            // 查找合适的容器位置
+            const container = findOrCreateContainer();
+            if (!container) return;
+            
+            // 创建健康助手UI
+            createHealthAssistantUI(container);
+            
+            // 绑定事件
+            bindEvents();
+            
+            // 初始消息
+            showWelcomeMessage();
+            
+            console.log('健康慧诊助手已初始化');
+        }, 1000);
     }
     
-    renderUI() {
-        // 创建主容器
-        this.container.innerHTML = '';
+    function findOrCreateContainer() {
+        // 尝试找到现有聊天容器
+        const existingChatAreas = document.querySelectorAll('[class*="chat"], [class*="message"], .semi-chat');
         
-        const mainDiv = document.createElement('div');
-        mainDiv.className = 'health-assistant-container';
-        mainDiv.style.cssText = `
-            font-family: 'PingFang SC', 'Noto Sans SC', sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: #f9f9f9;
-            min-height: 600px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        for (const area of existingChatAreas) {
+            if (area.clientHeight > 200) { // 找到足够大的聊天区域
+                return area;
+            }
+        }
+        
+        // 如果没有找到，创建一个新的容器
+        const mainContent = document.querySelector('main, .main-content, .coze-container, .semi-layout-content') || document.body;
+        
+        const container = document.createElement('div');
+        container.className = 'health-assistant-coze-container';
+        container.style.cssText = `
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 380px;
+            height: 500px;
+            background: var(--semi-color-bg-0);
+            border-radius: var(--semi-border-radius-large);
+            box-shadow: var(--semi-shadow-elevated);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid var(--semi-color-border);
         `;
         
-        // 标题区域
+        mainContent.appendChild(container);
+        return container;
+    }
+    
+    function createHealthAssistantUI(container) {
+        // 头部
         const header = document.createElement('div');
         header.style.cssText = `
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #4d53e8;
+            padding: 16px 20px;
+            background: var(--semi-color-primary-light-default);
+            color: var(--semi-color-text-0);
+            border-bottom: 1px solid var(--semi-color-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         `;
         
-        const title = document.createElement('h1');
-        title.textContent = '健康慧诊助手';
-        title.style.cssText = `
-            color: #333;
-            margin: 0;
-            font-size: 28px;
-            font-weight: 600;
+        header.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="
+                    width: 32px;
+                    height: 32px;
+                    background: var(--semi-color-primary);
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-weight: bold;
+                ">健</div>
+                <div>
+                    <div style="font-weight: 600; font-size: 16px;">健康慧诊助手</div>
+                    <div style="font-size: 12px; color: var(--semi-color-text-2);">在线 · 可随时咨询</div>
+                </div>
+            </div>
+            <button id="health-assistant-close" style="
+                background: none;
+                border: none;
+                cursor: pointer;
+                color: var(--semi-color-text-2);
+                padding: 4px;
+                border-radius: 4px;
+            ">×</button>
         `;
-        
-        const subtitle = document.createElement('p');
-        subtitle.textContent = '专业健康咨询与建议';
-        subtitle.style.cssText = `
-            color: #666;
-            margin: 10px 0 0 0;
-            font-size: 16px;
-        `;
-        
-        header.appendChild(title);
-        header.appendChild(subtitle);
         
         // 聊天区域
         const chatArea = document.createElement('div');
-        chatArea.className = 'chat-area';
+        chatArea.id = 'health-assistant-chat';
         chatArea.style.cssText = `
-            height: 400px;
+            flex: 1;
             overflow-y: auto;
-            margin-bottom: 20px;
             padding: 20px;
-            background: white;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
+            background: var(--semi-color-bg-1);
         `;
-        this.chatArea = chatArea;
         
         // 输入区域
-        const inputContainer = document.createElement('div');
-        inputContainer.style.cssText = `
-            display: flex;
-            gap: 10px;
+        const inputArea = document.createElement('div');
+        inputArea.style.cssText = `
+            padding: 16px 20px;
+            border-top: 1px solid var(--semi-color-border);
+            background: var(--semi-color-bg-0);
         `;
         
-        const inputField = document.createElement('input');
-        inputField.type = 'text';
-        inputField.placeholder = '请输入您的健康问题...';
-        inputField.style.cssText = `
-            flex: 1;
-            padding: 12px 15px;
-            border: 2px solid #4d53e8;
-            border-radius: 8px;
-            font-size: 16px;
-            outline: none;
-            transition: border-color 0.3s;
-        `;
-        inputField.addEventListener('focus', () => {
-            inputField.style.borderColor = '#6675D9';
-        });
-        inputField.addEventListener('blur', () => {
-            inputField.style.borderColor = '#4d53e8';
-        });
-        this.inputField = inputField;
-        
-        const sendButton = document.createElement('button');
-        sendButton.textContent = '发送';
-        sendButton.style.cssText = `
-            padding: 12px 24px;
-            background: #4d53e8;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.3s;
-        `;
-        sendButton.addEventListener('mouseover', () => {
-            sendButton.style.background = '#6675D9';
-        });
-        sendButton.addEventListener('mouseout', () => {
-            sendButton.style.background = '#4d53e8';
-        });
-        
-        inputContainer.appendChild(inputField);
-        inputContainer.appendChild(sendButton);
-        
-        // 加载指示器
-        const loader = document.createElement('div');
-        loader.className = 'loader';
-        loader.style.cssText = `
-            display: none;
-            text-align: center;
-            padding: 10px;
-            color: #4d53e8;
-        `;
-        loader.innerHTML = `
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <style>
-                    @keyframes rotate {
-                        from { transform: rotate(0deg); }
-                        to { transform: rotate(360deg); }
-                    }
-                    svg {
-                        animation: rotate 1s linear infinite;
-                    }
-                </style>
-                <circle cx="12" cy="12" r="10" stroke-width="4" stroke-dasharray="30" stroke-linecap="round"/>
-            </svg>
-            正在分析您的健康问题...
-        `;
-        this.loader = loader;
-        
-        // 免责声明
-        const disclaimer = document.createElement('div');
-        disclaimer.style.cssText = `
-            margin-top: 20px;
-            padding: 15px;
-            background: #fff8e1;
-            border-left: 4px solid #ffc107;
-            border-radius: 4px;
-            font-size: 12px;
-            color: #666;
-        `;
-        disclaimer.innerHTML = `
-            <strong>免责声明：</strong>本助手提供的健康建议仅供参考，不能替代专业医疗意见。如有严重症状，请立即就医。
+        inputArea.innerHTML = `
+            <div style="display: flex; gap: 8px;">
+                <input type="text" 
+                       id="health-assistant-input" 
+                       placeholder="输入健康问题..." 
+                       style="
+                           flex: 1;
+                           padding: 10px 16px;
+                           border: 1px solid var(--semi-color-border);
+                           border-radius: var(--semi-border-radius-medium);
+                           background: var(--semi-color-bg-2);
+                           color: var(--semi-color-text-0);
+                           font-size: 14px;
+                           outline: none;
+                       ">
+                <button id="health-assistant-send" style="
+                    padding: 10px 20px;
+                    background: var(--semi-color-primary);
+                    color: white;
+                    border: none;
+                    border-radius: var(--semi-border-radius-medium);
+                    cursor: pointer;
+                    font-weight: 600;
+                ">发送</button>
+            </div>
+            <div style="
+                margin-top: 12px;
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+            ">
+                <button class="quick-question" data-question="头痛怎么办？" style="
+                    padding: 6px 12px;
+                    background: var(--semi-color-fill-0);
+                    border: 1px solid var(--semi-color-border);
+                    border-radius: 16px;
+                    font-size: 12px;
+                    cursor: pointer;
+                    color: var(--semi-color-text-1);
+                ">头痛</button>
+                <button class="quick-question" data-question="发烧了怎么处理？" style="
+                    padding: 6px 12px;
+                    background: var(--semi-color-fill-0);
+                    border: 1px solid var(--semi-color-border);
+                    border-radius: 16px;
+                    font-size: 12px;
+                    cursor: pointer;
+                    color: var(--semi-color-text-1);
+                ">发烧</button>
+                <button class="quick-question" data-question="胃不舒服怎么办？" style="
+                    padding: 6px 12px;
+                    background: var(--semi-color-fill-0);
+                    border: 1px solid var(--semi-color-border);
+                    border-radius: 16px;
+                    font-size: 12px;
+                    cursor: pointer;
+                    color: var(--semi-color-text-1);
+                ">胃痛</button>
+                <button class="quick-question" data-question="如何改善睡眠？" style="
+                    padding: 6px 12px;
+                    background: var(--semi-color-fill-0);
+                    border: 1px solid var(--semi-color-border);
+                    border-radius: 16px;
+                    font-size: 12px;
+                    cursor: pointer;
+                    color: var(--semi-color-text-1);
+                ">失眠</button>
+            </div>
         `;
         
-        // 组装所有元素
-        mainDiv.appendChild(header);
-        mainDiv.appendChild(chatArea);
-        mainDiv.appendChild(loader);
-        mainDiv.appendChild(inputContainer);
-        mainDiv.appendChild(disclaimer);
+        // 组装
+        container.appendChild(header);
+        container.appendChild(chatArea);
+        container.appendChild(inputArea);
         
-        this.container.appendChild(mainDiv);
+        // 保存引用
+        window.healthAssistantContainer = container;
+        window.healthAssistantChat = chatArea;
+        window.healthAssistantInput = document.getElementById('health-assistant-input');
     }
     
-    bindEvents() {
-        const sendButton = this.container.querySelector('button');
-        const inputField = this.inputField;
-        
-        // 发送按钮点击事件
-        sendButton.addEventListener('click', () => {
-            this.sendMessage();
+    function bindEvents() {
+        // 关闭按钮
+        document.getElementById('health-assistant-close').addEventListener('click', () => {
+            window.healthAssistantContainer.style.display = 'none';
         });
         
-        // 输入框回车事件
-        inputField.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                this.sendMessage();
+        // 发送按钮
+        document.getElementById('health-assistant-send').addEventListener('click', sendMessage);
+        
+        // 输入框回车
+        document.getElementById('health-assistant-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
             }
         });
-    }
-    
-    loadInitialMessage() {
-        const welcomeMessage = {
-            type: 'assistant',
-            content: '您好！我是健康慧诊助手。我可以为您提供健康咨询、症状分析、饮食建议等服务。请告诉我您的健康问题。',
-            timestamp: new Date().toLocaleTimeString()
-        };
         
-        this.addMessage(welcomeMessage);
+        // 快捷问题
+        document.querySelectorAll('.quick-question').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const question = e.target.dataset.question;
+                document.getElementById('health-assistant-input').value = question;
+                sendMessage(question);
+            });
+        });
+        
+        // 拖动功能
+        makeDraggable(window.healthAssistantContainer);
     }
     
-    addMessage(message) {
-        this.messages.push(message);
-        this.renderMessage(message);
+    function makeDraggable(element) {
+        let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        
+        const header = element.querySelector('div:first-child');
+        header.style.cursor = 'move';
+        
+        header.onmousedown = dragMouseDown;
+        
+        function dragMouseDown(e) {
+            e = e || window.event;
+            e.preventDefault();
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            document.onmouseup = closeDragElement;
+            document.onmousemove = elementDrag;
+        }
+        
+        function elementDrag(e) {
+            e = e || window.event;
+            e.preventDefault();
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            
+            const newTop = element.offsetTop - pos2;
+            const newLeft = element.offsetLeft - pos1;
+            
+            // 限制在窗口内
+            const maxTop = window.innerHeight - element.offsetHeight - 50;
+            const maxLeft = window.innerWidth - element.offsetWidth - 50;
+            
+            element.style.top = Math.max(50, Math.min(newTop, maxTop)) + 'px';
+            element.style.left = Math.max(50, Math.min(newLeft, maxLeft)) + 'px';
+            element.style.right = 'auto';
+            element.style.bottom = 'auto';
+        }
+        
+        function closeDragElement() {
+            document.onmouseup = null;
+            document.onmousemove = null;
+        }
     }
     
-    renderMessage(message) {
+    function showWelcomeMessage() {
+        addMessage({
+            type: 'assistant',
+            content: '您好！我是健康慧诊助手，我可以为您提供：\n\n• 常见症状分析\n• 健康饮食建议\n• 生活作息指导\n• 用药注意事项\n• 就医建议参考\n\n请告诉我您关心的问题，或点击上方快捷按钮开始咨询。',
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        });
+    }
+    
+    function sendMessage(customQuestion = null) {
+        const input = document.getElementById('health-assistant-input');
+        const question = customQuestion || input.value.trim();
+        
+        if (!question) return;
+        
+        // 用户消息
+        addMessage({
+            type: 'user',
+            content: question,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        });
+        
+        if (!customQuestion) {
+            input.value = '';
+        }
+        
+        // 显示正在输入
+        showTypingIndicator();
+        
+        // 模拟API响应
+        setTimeout(() => {
+            removeTypingIndicator();
+            const response = generateResponse(question);
+            addMessage({
+                type: 'assistant',
+                content: response,
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            });
+        }, 1000 + Math.random() * 1000);
+    }
+    
+    function showTypingIndicator() {
+        const typingDiv = document.createElement('div');
+        typingDiv.id = 'health-assistant-typing';
+        typingDiv.style.cssText = `
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--semi-color-text-2);
+            font-size: 12px;
+            margin: 10px 0;
+        `;
+        typingDiv.innerHTML = `
+            <span>健康助手正在输入</span>
+            <span class="typing-dots">...</span>
+        `;
+        
+        window.healthAssistantChat.appendChild(typingDiv);
+        
+        // 动画效果
+        const dots = typingDiv.querySelector('.typing-dots');
+        let dotCount = 0;
+        window.typingInterval = setInterval(() => {
+            dotCount = (dotCount + 1) % 4;
+            dots.textContent = '.'.repeat(dotCount);
+        }, 300);
+        
+        scrollToBottom();
+    }
+    
+    function removeTypingIndicator() {
+        const typing = document.getElementById('health-assistant-typing');
+        if (typing) {
+            typing.remove();
+        }
+        if (window.typingInterval) {
+            clearInterval(window.typingInterval);
+        }
+    }
+    
+    function addMessage(message) {
+        const chat = window.healthAssistantChat;
         const messageDiv = document.createElement('div');
+        
         messageDiv.style.cssText = `
-            margin-bottom: 15px;
-            padding: 12px 16px;
-            border-radius: 12px;
+            margin-bottom: 16px;
             max-width: 80%;
-            word-wrap: break-word;
-            line-height: 1.5;
+            animation: fadeIn 0.3s ease;
         `;
         
         if (message.type === 'user') {
             messageDiv.style.cssText += `
-                background: #4d53e8;
-                color: white;
                 margin-left: auto;
-                border-bottom-right-radius: 4px;
+                background: var(--semi-color-primary-light-default);
+                color: var(--semi-color-text-0);
+                padding: 10px 16px;
+                border-radius: 16px 16px 4px 16px;
+                border: 1px solid var(--semi-color-primary-light-hover);
             `;
         } else {
             messageDiv.style.cssText += `
-                background: #f0f2ff;
-                color: #333;
-                border-bottom-left-radius: 4px;
+                background: var(--semi-color-fill-0);
+                color: var(--semi-color-text-0);
+                padding: 12px 16px;
+                border-radius: 16px 16px 16px 4px;
+                border: 1px solid var(--semi-color-border);
+                white-space: pre-line;
+                line-height: 1.5;
             `;
-            
-            // 添加时间戳
-            const timeSpan = document.createElement('div');
-            timeSpan.textContent = message.timestamp;
-            timeSpan.style.cssText = `
-                font-size: 11px;
-                color: #999;
-                margin-top: 5px;
-                text-align: right;
-            `;
-            messageDiv.appendChild(timeSpan);
         }
         
         messageDiv.textContent = message.content;
-        this.chatArea.appendChild(messageDiv);
-        this.chatArea.scrollTop = this.chatArea.scrollHeight;
+        
+        // 添加时间戳
+        const timeSpan = document.createElement('div');
+        timeSpan.textContent = message.timestamp;
+        timeSpan.style.cssText = `
+            font-size: 11px;
+            color: var(--semi-color-text-3);
+            margin-top: 4px;
+            text-align: ${message.type === 'user' ? 'right' : 'left'};
+        `;
+        messageDiv.appendChild(timeSpan);
+        
+        chat.appendChild(messageDiv);
+        scrollToBottom();
     }
     
-    async sendMessage() {
-        const inputField = this.inputField;
-        const question = inputField.value.trim();
-        
-        if (!question || this.isLoading) return;
-        
-        // 添加用户消息
-        const userMessage = {
-            type: 'user',
-            content: question,
-            timestamp: new Date().toLocaleTimeString()
-        };
-        this.addMessage(userMessage);
-        
-        // 清空输入框
-        inputField.value = '';
-        
-        // 显示加载指示器
-        this.isLoading = true;
-        this.loader.style.display = 'block';
-        
-        try {
-            // 模拟API调用
-            const response = await this.simulateAPIResponse(question);
-            
-            // 添加助手回复
-            const assistantMessage = {
-                type: 'assistant',
-                content: response,
-                timestamp: new Date().toLocaleTimeString()
-            };
-            this.addMessage(assistantMessage);
-        } catch (error) {
-            console.error('Error:', error);
-            const errorMessage = {
-                type: 'assistant',
-                content: '抱歉，暂时无法处理您的请求。请稍后再试。',
-                timestamp: new Date().toLocaleTimeString()
-            };
-            this.addMessage(errorMessage);
-        } finally {
-            // 隐藏加载指示器
-            this.isLoading = false;
-            this.loader.style.display = 'none';
-        }
+    function scrollToBottom() {
+        const chat = window.healthAssistantChat;
+        chat.scrollTop = chat.scrollHeight;
     }
     
-    async simulateAPIResponse(question) {
-        // 模拟延迟
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        // 简单的关键词匹配回复
+    function generateResponse(question) {
         const responses = {
-            '头痛': '头痛可能是多种原因引起的，如压力、疲劳、感冒或视力问题。建议多休息，保持充足睡眠。如果持续疼痛，请咨询医生。',
-            '发烧': '发烧是身体对抗感染的表现。建议多喝水、休息，可使用退烧药。如果体温超过39°C或持续不退，请及时就医。',
-            '咳嗽': '咳嗽可能是感冒、过敏或呼吸道感染的症状。多喝温水，避免刺激性食物。如果咳嗽持续一周以上，建议看医生。',
-            '胃痛': '胃痛可能与饮食不当、胃炎或消化不良有关。建议吃易消化的食物，避免辛辣油腻。如果疼痛剧烈，请就医检查。',
-            '失眠': '失眠可能与压力、作息不规律有关。建议建立规律的作息时间，睡前避免使用电子设备，可以尝试冥想或放松练习。',
-            '饮食': '均衡饮食应包括蔬菜、水果、全谷物、蛋白质和健康脂肪。建议每天喝足够的水，限制加工食品和糖分摄入。'
+            '头痛': '头痛可能的原因：\n\n1. 紧张性头痛：压力、疲劳引起\n2. 偏头痛：伴随恶心、畏光\n3. 鼻窦性头痛：感冒或过敏\n\n建议：\n• 休息放松\n• 适度冷敷\n• 保持水分\n• 如果持续或加重，建议就医',
+            '发烧': '发烧处理指南：\n\n体温分级：\n• 低热：37.3-38°C\n• 中等热：38.1-39°C\n• 高热：39.1-41°C\n\n处理建议：\n• 多喝水\n• 物理降温\n• 适当用药\n• 密切观察\n\n如体温超过39°C或持续3天不退，请就医。',
+            '胃痛': '胃痛可能原因：\n\n1. 消化不良\n2. 胃炎\n3. 胃溃疡\n4. 胆囊问题\n\n饮食建议：\n✓ 温和易消化食物\n✓ 少量多餐\n✓ 避免刺激性食物\n\n注意：如疼痛剧烈或呕血，立即就医。',
+            '失眠': '改善睡眠建议：\n\n1. 建立规律作息\n2. 睡前1小时远离电子设备\n3. 保持卧室黑暗安静\n4. 避免咖啡因和酒精\n5. 尝试放松技巧（冥想、深呼吸）\n\n持续失眠建议咨询医生。'
         };
         
-        // 查找匹配的关键词
+        // 关键词匹配
         for (const [keyword, response] of Object.entries(responses)) {
             if (question.includes(keyword)) {
                 return response;
             }
         }
         
-        // 默认回复
-        return `感谢您的咨询："${question}"。这是一个重要的健康问题。建议您：1. 详细记录症状 2. 观察症状变化 3. 如有需要，及时咨询专业医生获取准确诊断。`;
+        // 默认响应
+        return `感谢您的咨询："${question}"\n\n我是健康慧诊助手，我的建议仅供参考，不能替代专业医疗诊断。\n\n建议您：\n1. 详细记录症状\n2. 观察变化趋势\n3. 如有需要，及时咨询医生\n\n您还可以问我：头痛、发烧、胃痛、失眠等常见问题的处理方法。`;
     }
-}
-
-// 使用示例
-document.addEventListener('DOMContentLoaded', function() {
-    // 创建健康助手实例
-    const healthAssistant = new HealthAssistant({
-        container: document.getElementById('health-assistant-container') || document.body
-    });
     
-    // 如果需要全局访问
-    window.HealthAssistant = HealthAssistant;
-    window.healthAssistant = healthAssistant;
-});
-
-// 导出模块
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = HealthAssistant;
-}
+    // 添加CSS动画
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .health-assistant-coze-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .health-assistant-coze-container::-webkit-scrollbar-track {
+            background: var(--semi-color-fill-0);
+        }
+        
+        .health-assistant-coze-container::-webkit-scrollbar-thumb {
+            background: var(--semi-color-fill-2);
+            border-radius: 3px;
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // 暴露API
+    window.HealthAssistantCoze = {
+        show: function() {
+            if (window.healthAssistantContainer) {
+                window.healthAssistantContainer.style.display = 'flex';
+            }
+        },
+        hide: function() {
+            if (window.healthAssistantContainer) {
+                window.healthAssistantContainer.style.display = 'none';
+            }
+        },
+        sendMessage: sendMessage,
+        addMessage: addMessage
+    };
+})();
