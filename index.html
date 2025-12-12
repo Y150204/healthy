@@ -12,7 +12,7 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
             background: linear-gradient(135deg, #6675D9 0%, #4d53e8 100%);
             min-height: 100vh;
             padding: 20px;
@@ -49,6 +49,728 @@
             font-weight: 600;
         }
         
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .status-indicator {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4cd964;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        
         .chat-container {
             flex: 1;
-            padding: 20px
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            scroll-behavior: smooth;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 15px 18px;
+            border-radius: 16px;
+            max-width: 80%;
+            line-height: 1.6;
+            animation: slideIn 0.3s ease-out;
+            word-wrap: break-word;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px) scale(0.95); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1); 
+            }
+        }
+        
+        .user-message {
+            background: linear-gradient(135deg, #4d53e8, #6675D9);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .assistant-message {
+            background: white;
+            border: 1px solid #e8e8e8;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .assistant-message strong {
+            color: #4d53e8;
+        }
+        
+        .assistant-message ul, .assistant-message ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .assistant-message li {
+            margin-bottom: 5px;
+        }
+        
+        .message-time {
+            font-size: 11px;
+            color: #999;
+            margin-top: 8px;
+            text-align: right;
+            opacity: 0.8;
+        }
+        
+        .input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        
+        .input-area input {
+            flex: 1;
+            padding: 15px 18px;
+            border: 2px solid #e8e8e8;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+            background: #f9f9f9;
+        }
+        
+        .input-area input:focus {
+            border-color: #4d53e8;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(77, 83, 232, 0.1);
+        }
+        
+        .input-area button {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #4d53e8, #6675D9);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 100px;
+            box-shadow: 0 4px 12px rgba(77, 83, 232, 0.3);
+        }
+        
+        .input-area button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(77, 83, 232, 0.4);
+        }
+        
+        .input-area button:active {
+            transform: translateY(0);
+        }
+        
+        .input-area button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 15px;
+            color: #4d53e8;
+            display: none;
+            background: rgba(77, 83, 232, 0.05);
+            border-radius: 12px;
+            margin: 0 20px 20px;
+        }
+        
+        .loading span {
+            display: inline-block;
+            animation: rotate 1s linear infinite;
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .quick-questions {
+            padding: 15px 20px;
+            background: white;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .quick-questions h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .quick-questions h3:before {
+            content: "💡";
+        }
+        
+        .quick-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .quick-btn {
+            padding: 8px 16px;
+            background: #f0f2ff;
+            border: 1px solid #dce0ff;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #4d53e8;
+        }
+        
+        .quick-btn:hover {
+            background: #4d53e8;
+            color: white;
+            border-color: #4d53e8;
+            transform: translateY(-1px);
+        }
+        
+        .disclaimer {
+            padding: 15px 20px;
+            background: #fff8e1;
+            border-top: 1px solid #ffc107;
+            font-size: 12px;
+            color: #856404;
+            line-height: 1.5;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        
+        .empty-state img {
+            width: 80px;
+            opacity: 0.5;
+            margin-bottom: 20px;
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #666;
+        }
+        
+        /* 滚动条样式 */
+        .chat-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .chat-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .chat-container::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
+        }
+        
+        .chat-container::-webkit-scrollbar-thumb:hover {
+            background: #aaa;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .app-container {
+                height: 95vh;
+                border-radius: 16px;
+            }
+            
+            .header h1 {
+                font-size: 22px;
+            }
+            
+            .status-indicator {
+                position: static;
+                justify-content: center;
+                margin-top: 10px;
+            }
+            
+            .input-area {
+                padding: 15px;
+            }
+            
+            .input-area button {
+                padding: 15px 20px;
+                min-width: 80px;
+            }
+            
+            .quick-buttons {
+                justify-content: center;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1>健康慧疗助手</h1>
+            <p>AI智能健康咨询 · 24小时在线服务</p>
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>在线服务</span>
+            </div>
+        </div>
+        
+        <div class="chat-container" id="chatContainer">
+            <div class="empty-state" id="emptyState">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM7 7.5C7 6.67 7.67 6 8.5 6C9.33 6 10 6.67 10 7.5C10 8.33 9.33 9 8.5 9C7.67 9 7 8.33 7 7.5ZM12 18C9.67 18 7.68 16.75 6.5 14.99C6.5 13.66 9.34 12.75 12 12.75C14.66 12.75 17.5 13.65 17.5 14.99C16.32 16.75 14.33 18 12 18ZM15.5 9C14.67 9 14 8.33 14 7.5C14 6.67 14.67 6 15.5 6C16.33 6 17 6.67 17 7.5C17 8.33 16.33 9 15.5 9Z" fill="#cccccc"/>
+                </svg>
+                <h3>欢迎使用健康慧疗助手</h3>
+                <p>输入您的健康问题，获取专业建议</p>
+            </div>
+        </div>
+        
+        <div class="loading" id="loading">
+            <span>⏳</span> 正在分析您的问题...
+        </div>
+        
+        <div class="quick-questions">
+            <h3>快速提问</h3>
+            <div class="quick-buttons">
+                <button class="quick-btn" onclick="quickQuestion('头痛有什么快速缓解方法？')">头痛缓解</button>
+                <button class="quick-btn" onclick="quickQuestion('如何改善睡眠质量？')">改善睡眠</button>
+                <button class="quick-btn" onclick="quickQuestion('健康的饮食习惯应该注意什么？')">健康饮食</button>
+                <button class="quick-btn" onclick="quickQuestion('如何有效缓解工作压力？')">缓解压力</button>
+                <button class="quick-btn" onclick="quickQuestion('感冒了应该怎么调理？')">感冒调理</button>
+                <button class="quick-btn" onclick="quickQuestion('适合办公室族的运动有哪些？')">办公室运动</button>
+            </div>
+        </div>
+        
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="请输入您的健康问题（如：最近总是失眠怎么办？）..." autocomplete="off">
+            <button onclick="sendMessage()" id="sendBtn">发送</button>
+        </div>
+        
+        <div class="disclaimer">
+            <strong>重要提示：</strong>本助手提供的信息仅供参考，不能替代专业医疗建议。如有紧急医疗情况，请立即就医。
+        </div>
+    </div>
+
+    <script>
+        // API配置（后期可以替换）
+        const API_CONFIG = {
+            url: 'YOUR_API_URL_HERE', // 后期替换为真实API地址
+            apiKey: 'YOUR_API_KEY_HERE', // 后期替换为真实API密钥
+            model: 'gpt-3.5-turbo',
+            temperature: 0.7
+        };
+        
+        // 存储聊天记录
+        let chatHistory = [];
+        
+        // 初始化
+        window.onload = function() {
+            // 欢迎消息
+            setTimeout(() => {
+                addWelcomeMessage();
+            }, 500);
+            
+            // 输入框回车发送
+            document.getElementById('userInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            // 输入框聚焦
+            document.getElementById('userInput').focus();
+        };
+        
+        // 添加欢迎消息
+        function addWelcomeMessage() {
+            const welcomeMessages = [
+                "👋 您好！我是健康慧疗助手，很高兴为您服务。",
+                "💪 我可以为您提供专业的健康咨询、症状分析、饮食建议和生活方式指导。",
+                "📝 请详细描述您的健康问题，我会尽我所能为您提供帮助。",
+                "⚠️ 温馨提示：我的建议仅供参考，不能替代专业医疗诊断。"
+            ];
+            
+            // 逐条显示欢迎消息
+            welcomeMessages.forEach((msg, index) => {
+                setTimeout(() => {
+                    addMessage('assistant', msg);
+                }, index * 800);
+            });
+        }
+        
+        // 快速提问
+        function quickQuestion(question) {
+            document.getElementById('userInput').value = question;
+            sendMessage();
+        }
+        
+        // 发送消息
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const question = input.value.trim();
+            
+            if (!question) {
+                input.focus();
+                return;
+            }
+            
+            // 隐藏空状态
+            document.getElementById('emptyState').style.display = 'none';
+            
+            // 添加用户消息
+            addMessage('user', question);
+            input.value = '';
+            
+            // 显示加载中
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('sendBtn').disabled = true;
+            
+            try {
+                // 调用API
+                const response = await callHealthAPI(question);
+                
+                // 添加AI回复
+                addMessage('assistant', response);
+                
+            } catch (error) {
+                console.error('API调用错误:', error);
+                
+                // 使用备用回复
+                const fallbackResponse = getFallbackResponse(question);
+                addMessage('assistant', fallbackResponse + '\n\n（由于网络问题，当前使用备用回答）');
+                
+            } finally {
+                // 隐藏加载中
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('sendBtn').disabled = false;
+                input.focus();
+            }
+        }
+        
+        // 调用健康API（后期可替换为真实API）
+        async function callHealthAPI(question) {
+            // 这里使用模拟API，后期可以替换为真实API调用
+            await simulateAPIDelay();
+            
+            // 如果是测试阶段，使用智能回复
+            return getIntelligentResponse(question);
+            
+            /* 
+            // 后期可以替换为真实API调用：
+            const response = await fetch(API_CONFIG.url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${API_CONFIG.apiKey}`
+                },
+                body: JSON.stringify({
+                    model: API_CONFIG.model,
+                    messages: [
+                        {
+                            role: 'system',
+                            content: '你是一个专业的健康顾问，提供温暖、专业、易懂的健康建议。'
+                        },
+                        ...chatHistory.map(msg => ({
+                            role: msg.type === 'user' ? 'user' : 'assistant',
+                            content: msg.content
+                        })),
+                        {
+                            role: 'user',
+                            content: question
+                        }
+                    ],
+                    temperature: API_CONFIG.temperature
+                })
+            });
+            
+            const data = await response.json();
+            return data.choices[0].message.content;
+            */
+        }
+        
+        // 模拟API延迟
+        function simulateAPIDelay() {
+            return new Promise(resolve => {
+                setTimeout(resolve, 800 + Math.random() * 1200);
+            });
+        }
+        
+        // 智能回复（模拟AI回复）
+        function getIntelligentResponse(question) {
+            const responses = {
+                // 头痛相关
+                '头痛': `**头痛缓解建议：**
+1. **休息放松**：找个安静的地方休息15-20分钟
+2. **适当按摩**：轻轻按摩太阳穴和颈部
+3. **冷敷热敷**：
+   - 紧张性头痛：热敷后颈部
+   - 偏头痛：冷敷前额
+4. **补充水分**：确保喝足够的水
+5. **调整姿势**：避免长时间保持同一姿势
+
+如果头痛持续或加剧，建议就医检查。`,
+
+                '失眠': `**改善睡眠质量的方法：**
+1. **建立规律作息**：
+   - 每天固定时间睡觉和起床
+   - 周末也不要睡懒觉
+2. **睡前准备**：
+   - 睡前一小时关闭电子设备
+   - 可以阅读纸质书或听轻音乐
+3. **营造舒适环境**：
+   - 保持卧室安静、黑暗、凉爽
+   - 使用舒适的床上用品
+4. **放松技巧**：
+   - 深呼吸练习：4-7-8呼吸法
+   - 渐进式肌肉放松
+5. **白天习惯**：
+   - 白天适当运动
+   - 避免午睡过长（不超过30分钟）
+
+建议坚持2-4周观察效果。`,
+
+                '饮食': `**健康饮食建议：**
+1. **均衡膳食**：
+   - 每餐包含蛋白质、碳水化合物、健康脂肪
+   - 多吃不同颜色的蔬菜水果
+2. **适量原则**：
+   - 控制主食摄入量
+   - 适量优质蛋白（鱼、豆、蛋、奶）
+3. **烹饪方式**：
+   - 多蒸煮，少油炸
+   - 控制油盐糖用量
+4. **进食习惯**：
+   - 细嚼慢咽，每口咀嚼20-30次
+   - 不要边吃边看手机/电视
+5. **水分补充**：
+   - 每天喝够1.5-2升水
+   - 避免含糖饮料
+
+记住：没有"完美"饮食，关键是长期坚持。`,
+
+                '压力': `**缓解压力方法：**
+1. **身体层面**：
+   - 每天30分钟有氧运动
+   - 瑜伽或太极等温和运动
+   - 保证7-8小时睡眠
+2. **心理层面**：
+   - 写日记记录感受
+   - 练习正念冥想
+   - 培养兴趣爱好
+3. **社交层面**：
+   - 与信任的人交流
+   - 参加社交活动
+   - 学会说"不"
+4. **工作层面**：
+   - 合理规划时间
+   - 定期休息放松
+   - 分解大任务为小目标
+
+如果压力持续影响生活，建议寻求专业帮助。`,
+
+                '感冒': `**感冒调理建议：**
+1. **充分休息**：
+   - 保证充足睡眠
+   - 减少工作和活动量
+2. **补充水分**：
+   - 多喝温水
+   - 可以喝一些蜂蜜柠檬水
+3. **饮食调理**：
+   - 吃易消化的食物
+   - 补充维生素C（橙子、猕猴桃）
+4. **症状缓解**：
+   - 鼻塞：温盐水洗鼻
+   - 喉咙痛：温盐水漱口
+5. **注意事项**：
+   - 勤洗手，避免传染
+   - 保持室内空气流通
+
+如果症状持续超过一周或加重，请及时就医。`,
+
+                '运动': `**适合办公室族的运动：**
+1. **办公室微运动**：
+   - 每小时起身活动5分钟
+   - 坐姿伸展运动
+2. **日常增加活动量**：
+   - 走楼梯代替电梯
+   - 午休时间散步15分钟
+3. **规律锻炼**：
+   - 每周3-5次，每次30分钟
+   - 有氧运动：快走、游泳、骑车
+4. **力量训练**：
+   - 每周2次全身力量训练
+   - 可以使用弹力带或小哑铃
+5. **柔韧性训练**：
+   - 每天拉伸5-10分钟
+   - 尝试办公室瑜伽
+
+关键是找到适合自己的运动并坚持下去。`
+            };
+            
+            // 查找匹配的关键词
+            for (const [keyword, response] of Object.entries(responses)) {
+                if (question.includes(keyword)) {
+                    return response;
+                }
+            }
+            
+            // 通用回复模板
+            const genericResponses = [
+                `感谢您的提问。${question} 是一个值得关注的问题。
+
+基于我的专业判断，我建议：
+1. **详细记录症状**：包括发生时间、频率、强度
+2. **观察影响因素**：记录饮食、作息、情绪变化
+3. **尝试调整**：从小改变开始，观察效果
+4. **寻求专业帮助**：如果症状持续或加重
+
+请记住：健康问题的个体差异很大，我的建议仅供参考。`,
+
+                `我理解您对"${question}"的关心。健康管理是一个渐进的过程。
+
+我的建议：
+• **全面评估**：考虑身体状况、生活习惯、心理状态
+• **循序渐进**：不要急于求成，小改变往往更有效
+• **建立习惯**：将健康行为融入日常生活
+• **定期检查**：关注身体的变化和反应
+
+如有需要，我可以提供更具体的指导。`,
+
+                `"${question}"确实是一个重要的健康话题。
+
+在给出具体建议前，我想了解：
+• 这种情况持续多久了？
+• 是否已经尝试过什么方法？
+• 对日常生活有多大影响？
+
+根据现有信息，我的初步建议是：
+1. 保持均衡的饮食和充足的睡眠
+2. 适度运动，但不要过度
+3. 管理压力，保持良好心态
+4. 如有疑问，及时咨询专业医生`
+            ];
+            
+            return genericResponses[Math.floor(Math.random() * genericResponses.length)];
+        }
+        
+        // 备用回复（API失败时使用）
+        function getFallbackResponse(question) {
+            const fallbacks = [
+                `关于"${question}"，我建议您：保持良好的生活习惯，均衡饮食，适度运动。如有持续不适，请及时就医。`,
+                `健康问题需要个体化分析。建议您详细记录症状变化，并咨询专业医疗机构获取准确建议。`,
+                `理解您的担忧。许多健康问题可以通过改善生活方式得到缓解，建议从规律作息和健康饮食开始。`
+            ];
+            
+            return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+        }
+        
+        // 添加消息到聊天窗口
+        function addMessage(type, content) {
+            const chatContainer = document.getElementById('chatContainer');
+            const messageDiv = document.createElement('div');
+            const time = new Date().toLocaleTimeString('zh-CN', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            messageDiv.className = `message ${type}-message`;
+            
+            // 格式化回复内容（将**加粗**转换为<strong>）
+            let formattedContent = content
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n\d+\./g, '\n<br>$&')
+                .replace(/\n•/g, '\n<br>•')
+                .replace(/\n\n/g, '\n<br><br>');
+            
+            messageDiv.innerHTML = `
+                ${formattedContent}
+                <div class="message-time">${time}</div>
+            `;
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            // 保存到聊天历史
+            chatHistory.push({ 
+                type, 
+                content: content.replace(/\*\*/g, ''), // 去掉格式标记
+                time 
+            });
+            
+            // 限制历史记录长度
+            if (chatHistory.length > 20) {
+                chatHistory = chatHistory.slice(-15);
+            }
+        }
+        
+        // 清空聊天记录
+        function clearChat() {
+            document.getElementById('chatContainer').innerHTML = '';
+            chatHistory = [];
+            document.getElementById('emptyState').style.display = 'block';
+            addWelcomeMessage();
+        }
+        
+        // 键盘快捷键
+        document.addEventListener('keydown', function(e) {
+            // Ctrl + K 清空聊天
+            if (e.ctrlKey && e.key === 'k') {
+                e.preventDefault();
+                clearChat();
+            }
+            
+            // Ctrl + / 聚焦输入框
+            if (e.ctrlKey && e.key === '/') {
+                e.preventDefault();
+                document.getElementById('userInput').focus();
+            }
+        });
+    </script>
+</body>
+</html>
